@@ -12,10 +12,6 @@ store.subscribe(() => {
   console.log('New State ', store.getState());
 });
 
-store.dispatch(actions.addTodo('Clean shelf'));
-store.dispatch(actions.setSearchText('shelf'));
-store.dispatch(actions.toggleShowCompleted());
-
 //Loading foundation
 $(document).foundation();
 

@@ -100,13 +100,19 @@ describe('Actions', () => {
     var testTodoRef;
 
     beforeEach((done) => {
-      testTodoRef = firebaseRef.child('todos').push();
+      var todosRef = firebaseRef.child('todos');
 
-      testTodoRef.set({
-        text: 'some test text todo',
-        completed: false,
-        createdAt: 13434
-      }).then(() => done());
+      todosRef.remove().then(() => {
+        testTodoRef = firebaseRef.child('todos').push();
+
+        return testTodoRef.set({
+          text: 'some test text todo',
+          completed: false,
+          createdAt: 13434
+        })
+      })
+      .then(() => done())
+      .catch(done);
     });
 
     afterEach((done) => {
@@ -118,7 +124,7 @@ describe('Actions', () => {
       const action = actions.startToggleTodo(testTodoRef.key, true);
 
       store.dispatch(action).then(() => {
-        const mockActions = store.getActions;
+        const mockActions = store.getActions();
 
         expect(mockActions[0]).toInclude({
           type: 'UPDATE_TODO',
@@ -128,6 +134,21 @@ describe('Actions', () => {
           completed: true
         });
         expect(mockActions[0].updates.completedAt).toExist();
+
+        done();
+      }, done());
+    });
+
+    it('should fetch todos from firebase and dispatch ADD_TODOS action', (done) => {
+      const store = createMockStore({});
+      const action = actions.startAddTodos();
+
+      store.dispatch(action).then(() => {
+        const mockActions = store.getActions();
+
+        expect(mockActions[0].type).toEqual('ADD_TODOS');
+        expect(mockActions[0].todos.length).toEqual(1);
+        expect(mockActions[0].todos[0].text).toEqual('some test text todo');
 
         done();
       }, done());
